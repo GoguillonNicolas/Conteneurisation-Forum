@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL (isolée du frontend)
+  db:
+    image: postgres:15-alpine
+    container_name: forum_db
+    environment:
+      POSTGRES_USER: forum_user
+      POSTGRES_PASSWORD: forum_password
+      POSTGRES_DB: forum_db
+    networks:
+      - internal_network
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # API messages
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: forum_api
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=forum_user
+      - DB_PASSWORD=forum_password
+      - DB_NAME=forum_db
+    networks:
+      - internal_network
+      - frontend_network
+    restart: unless-stopped
+
+  # Frontend Thread (Lecture seule) - port 80
+  thread:
+    build:
+      context: ./thread
+      dockerfile: Dockerfile
+    container_name: forum_thread
+    ports:
+      - "80:80"
+    networks:
+      - frontend_network
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Sender (Écriture) - port 8080
+  sender:
+    build:
+      context: ./sender
+      dockerfile: Dockerfile
+    container_name: forum_sender
+    ports:
+      - "8080:80"
+    networks:
+      - frontend_network
+    depends_on:
+      - api
+    restart: unless-stopped
+
+networks:
+  # Réseau privé pour la BDD
+  internal_network:
+    driver: bridge
+  # Réseau pour connecter API, Thread et Sender
+  frontend_network:
+    driver: bridge
+
+volumes:
+  # Persistance des données de la base de données
+  db_data:
