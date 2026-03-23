@@ -1,4 +1,5 @@
 import os
+import time
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from flask import Flask, request, jsonify
@@ -20,20 +21,27 @@ def get_db_connection():
         return None
 
 def init_db():
-    """Initialisation de la table"""
-    conn = get_db_connection()
-    if conn:
-        with conn.cursor() as cur:
-            cur.execute('''
-                CREATE TABLE IF NOT EXISTS messages (
-                    id SERIAL PRIMARY KEY,
-                    pseudo VARCHAR(100) NOT NULL,
-                    content TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            ''')
-        conn.commit()
-        conn.close()
+    """Initialisation de la table avec essais multiples (retries)"""
+    retries = 5
+    while retries > 0:
+        conn = get_db_connection()
+        if conn:
+            with conn.cursor() as cur:
+                cur.execute('''
+                    CREATE TABLE IF NOT EXISTS messages (
+                        id SERIAL PRIMARY KEY,
+                        pseudo VARCHAR(100) NOT NULL,
+                        content TEXT NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                ''')
+            conn.commit()
+            conn.close()
+            print("Table messages verifiee et prete !", flush=True)
+            return
+        print("La base de donnees n'est pas encore prete, on patiente 2 secondes...", flush=True)
+        time.sleep(2)
+        retries -= 1
 
 @app.route('/messages', methods=['GET'])
 def get_messages():
