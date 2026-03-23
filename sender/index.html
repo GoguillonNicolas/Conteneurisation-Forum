@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poster un message - Forum</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, #2e1065, #0f172a 70%);
+            font-family: 'Outfit', sans-serif;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        h1 { margin-bottom: 0.5rem; font-size: 2.5rem; background: linear-gradient(to right, #a855f7, #ec4899); -webkit-background-clip: text; color: transparent; }
+        p.subtitle { color: #94a3b8; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; color: #cbd5e1; font-weight: 600; font-size: 0.9rem;}
+        input, textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        input:focus, textarea:focus { border-color: #a855f7; box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2); }
+        textarea { resize: vertical; min-height: 120px; }
+        button {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px #ec4899; }
+        .notification {
+            margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600; display: none;
+        }
+        .success { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .error { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>S'exprimer.</h1>
+        <p class="subtitle">Publiez votre message sur le forum, totalement incognito.</p>
+        
+        <form id="postForm">
+            <div class="form-group">
+                <label for="pseudo">Votre Pseudonyme</label>
+                <input type="text" id="pseudo" required placeholder="Ex: CryptoNinja99">
+            </div>
+            <div class="form-group">
+                <label for="content">Votre Message</label>
+                <textarea id="content" required placeholder="Ce que vous avez sur le cœur..."></textarea>
+            </div>
+            <button type="submit">Envoyer le message 🚀</button>
+        </form>
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('postForm');
+        const notif = document.getElementById('notification');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pseudo = document.getElementById('pseudo').value;
+            const content = document.getElementById('content').value;
+            const btn = form.querySelector('button');
+            
+            btn.textContent = "Envoi en cours...";
+            btn.style.opacity = '0.7';
+
+            try {
+                // Cette URL '/api/' est redirigee par Nginx (cf. nginx.conf) vers http://api:5000/
+                const res = await fetch('/api/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pseudo, content })
+                });
+
+                if (res.ok) {
+                    notif.textContent = "Message publié avec succès !";
+                    notif.className = "notification success";
+                    form.reset();
+                } else {
+                    const data = await res.json();
+                    notif.textContent = data.error || "Erreur lors de l'envoi.";
+                    notif.className = "notification error";
+                }
+            } catch (err) {
+                notif.textContent = "Serveur injoignable.";
+                notif.className = "notification error";
+            }
+            
+            notif.style.display = "block";
+            btn.textContent = "Envoyer le message 🚀";
+            btn.style.opacity = '1';
+            
+            setTimeout(() => { notif.style.display = "none"; }, 4000);
+        });
+    </script>
+</body>
+</html>
