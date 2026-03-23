@@ -6,6 +6,10 @@
 - **BDD (PostgreSQL 15)** : Isolée sur l'`internal_network`. Aucune exposition web. Les données sont sauvegardées dans un Volume Docker.
 - **API (Python Flask)** : Backend léger connecté à la BDD. L'API tourne sur le port 5000 mais n'est **pas exposée** sur le port réseau de l'ordinateur hôte.
 - **Thread & Sender (Nginx + HTML natif)** : Deux sites web servis par des conteneurs Nginx ultra-légers. Pour respecter l'isolement de l'API, **les configurations Nginx intègrent un Reverse Proxy**. Le Javascript du navigateur "croit" parler au serveur Nginx (`/api/messages`), et Nginx transmet secrètement la requête à l'API interne de manière sécurisée.
+- **Commitizen** : Outil de gestion des commits standardisés.
+- **IDE** : Antigravity
+- **Outils** : Docker, Docker Compose, Git
+- **IA** : Gemini (génération rapide des HTML, des configs Commitizen, relecture du code et suggestions)
 
 ### 2. Démarrage de l'app
 
