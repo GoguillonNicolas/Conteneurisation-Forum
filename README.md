@@ -1,6 +1,14 @@
 # Mon Forum Anonyme
 
-## Objectifs du Projet
+## Partie 1 : Explication du projet et Choix technologiques
+
+*(À remplir plus tard : explication de l'architecture, choix de la base de données, choix de l'API Flask, et instructions d'installation/lancement.)*
+
+---
+
+## Partie 2 : Sujet original (Consignes)
+
+### Objectifs du Projet
 Ce projet vise à valider les compétences suivantes :
 - Comprendre les concepts de base de la conteneurisation Docker afin d'adopter les meilleures pratiques pour déployer et gérer des conteneurs dans divers environnements.
 - Créer et utiliser ses propres conteneurs afin de développer, tester et déployer des applications de manière cohérente.
