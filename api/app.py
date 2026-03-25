@@ -21,7 +21,7 @@ def get_db_connection():
         return None
 
 def init_db():
-    """Initialisation de la table avec essais multiples (retries)"""
+    """Initialisation de la table"""
     retries = 5
     while retries > 0:
         conn = get_db_connection()
@@ -37,9 +37,9 @@ def init_db():
                 ''')
             conn.commit()
             conn.close()
-            print("Table messages verifiee et prete !", flush=True)
+            print("Table creee", flush=True)
             return
-        print("La base de donnees n'est pas encore prete, on patiente 2 secondes...", flush=True)
+        print("Retrying", flush=True)
         time.sleep(2)
         retries -= 1
 
@@ -85,7 +85,5 @@ def add_message():
     return jsonify({"message": "Message publie"}), 201
 
 if __name__ == '__main__':
-    # On initialise la BDD si on y a acces lors du lancement
     init_db()
-    # Le host 0.0.0.0 est important sur Docker pour etre ecoutable de l'exterieur
     app.run(host='0.0.0.0', port=5000)
